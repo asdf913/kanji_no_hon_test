@@ -5,7 +5,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,6 +32,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.google.common.reflect.Reflection;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
@@ -79,9 +83,9 @@ public class Main {
 			//
 			Field f = null;
 			//
-			List<Field> fieldOrder = null;
-			//
 			String string = null;
+			//
+			IntMap<Field> intMap = null;
 			//
 			for (final Sheet sheet : workbook) {
 				//
@@ -107,13 +111,18 @@ public class Main {
 								//
 							} // if
 								//
-							add(fieldOrder = ObjectUtils.getIfNull(fieldOrder, ArrayList::new),
-									orElse(findFirst(testAndApply(Objects::nonNull, fs, Arrays::stream, null).filter(
-											field -> Objects.equals(getName(field), cell.getStringCellValue()))),
-											null));
-							//
-						} else if (fieldOrder.size() > (columnIndex = cell.getColumnIndex())
-								&& (f = fieldOrder.get(columnIndex)) != null) {
+							if ((intMap = ObjectUtils.getIfNull(intMap,
+									() -> Reflection.newProxy(IntMap.class, new IH()))) != null) {
+								//
+								intMap.setObject(cell.getColumnIndex(), orElse(
+										findFirst(testAndApply(Objects::nonNull, fs, Arrays::stream, null).filter(
+												field -> Objects.equals(getName(field), cell.getStringCellValue()))),
+										null));
+								//
+							} // if
+								//
+						} else if (intMap != null && intMap.containsObject(columnIndex = cell.getColumnIndex())
+								&& (f = intMap.getObject(columnIndex)) != null) {
 							// //
 							f.setAccessible(true);
 							//
@@ -133,12 +142,6 @@ public class Main {
 								//
 							}
 							//
-						} // if
-							//
-						if ((columnIndex = cell.getColumnIndex()) == 2) {// TODO
-							text.text = cell.getStringCellValue();
-						} else if (columnIndex == 3) {// TODO
-							text.hiragana = cell.getStringCellValue();
 						} // if
 							//
 					} // for
@@ -177,6 +180,76 @@ public class Main {
 				//
 		} // if
 			//
+	}
+
+	private static class IH implements InvocationHandler {
+
+		private Map<Object, Object> objects = null;
+
+		private Map<Object, Object> getObjects() {
+			if (objects == null) {
+				objects = new LinkedHashMap<>();
+			}
+			return objects;
+		}
+
+		@Override
+		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
+			//
+			final String methodName = method != null ? method.getName() : null;
+			//
+			if (proxy instanceof IntMap) {
+				//
+				if (Objects.equals(methodName, "getObject") && args != null && args.length > 0) {
+					//
+					final Object key = args[0];
+					//
+					if (!containsKey(getObjects(), key)) {
+						//
+						throw new IllegalStateException(String.format("Key [%1$s] Not Found", key));
+						//
+					} // if
+						//
+					return getObjects().get(key);
+					//
+				} else if (Objects.equals(methodName, "containsObject") && args != null && args.length > 0) {
+					//
+					return containsKey(getObjects(), args[0]);
+					//
+				} else if (Objects.equals(methodName, "setObject") && args != null && args.length > 1) {
+					//
+					put(getObjects(), args[0], args[1]);
+					//
+					return null;
+					//
+				} // if
+					//
+			} // if
+				//
+			throw new Throwable(methodName);
+			//
+		}
+
+		private static boolean containsKey(final Map<?, ?> instance, final Object key) {
+			return instance != null && instance.containsKey(key);
+		}
+
+		private static <K, V> void put(final Map<K, V> instance, final K key, final V value) {
+			if (instance != null) {
+				instance.put(key, value);
+			}
+		}
+
+	}
+
+	private static interface IntMap<T> {
+
+		T getObject(final int key);
+
+		boolean containsObject(final int key);
+
+		void setObject(final int key, final T value);
+
 	}
 
 	private static <T, R, E extends Throwable> R testAndApply(final Predicate<T> predicate, final T value,
