@@ -121,7 +121,7 @@ public class Main {
 								//
 							} // if
 								//
-						} else if (intMap != null && intMap.containsObject(columnIndex = cell.getColumnIndex())
+						} else if (intMap != null && intMap.containsKey(columnIndex = cell.getColumnIndex())
 								&& (f = intMap.getObject(columnIndex)) != null) {
 							// //
 							f.setAccessible(true);
@@ -212,7 +212,7 @@ public class Main {
 						//
 					return getObjects().get(key);
 					//
-				} else if (Objects.equals(methodName, "containsObject") && args != null && args.length > 0) {
+				} else if (Objects.equals(methodName, "containsKey") && args != null && args.length > 0) {
 					//
 					return containsKey(getObjects(), args[0]);
 					//
@@ -246,7 +246,7 @@ public class Main {
 
 		T getObject(final int key);
 
-		boolean containsObject(final int key);
+		boolean containsKey(final int key);
 
 		void setObject(final int key, final T value);
 
