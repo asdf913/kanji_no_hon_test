@@ -298,10 +298,6 @@ public class Main extends JFrame implements ActionListener {
 			return hiragana;
 		}
 
-		private Integer getNumber() {
-			return number;
-		}
-
 	}
 
 	public static void main(final String[] args) {
