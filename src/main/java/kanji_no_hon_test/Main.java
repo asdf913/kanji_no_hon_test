@@ -55,22 +55,32 @@ public class Main extends JFrame implements ActionListener {
 
 	private static final String WRAP = "wrap";
 
+	private static final String GROWX = "growx";
+
 	private AbstractButton btnExecute = null;
 
-	private JTextComponent tfNumberStart, tfNumberEnd = null;
+	private JTextComponent tfNumberStart, tfNumberEnd, tfUnitStart, tfUnitEnd = null;
 
 	private Main() {
 	}
 
 	private void init() {
 		//
-		add(new JLabel("Number Range"));
+		add(new JLabel("Unit Range"));
 		//
-		add(tfNumberStart = new JTextField(), String.format("wmin %1$spx", 50));
+		add(tfUnitStart = new JTextField(), String.format("wmin %1$spx", 50));
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfNumberEnd = new JTextField(), String.format("%1$s,wmin %2$spx", WRAP, 50));
+		add(tfUnitEnd = new JTextField(), String.format("%1$s,wmin %2$spx", WRAP, 50));
+		//
+		add(new JLabel("Number Range"));
+		//
+		add(tfNumberStart = new JTextField(), GROWX);
+		//
+		add(new JLabel(" - "));
+		//
+		add(tfNumberEnd = new JTextField(), String.format("%1$s,%2$s", WRAP, GROWX));
 		//
 		add(new JLabel());
 		//
@@ -114,6 +124,10 @@ public class Main extends JFrame implements ActionListener {
 				Integer integer = null;
 				//
 				IntMap<Field> intMap = null;
+				//
+				final Integer unitStart = valueOf(getText(tfUnitStart));
+				//
+				final Integer unitEnd = valueOf(getText(tfUnitEnd));
 				//
 				final Integer numberStart = valueOf(getText(tfNumberStart));
 				//
@@ -204,13 +218,22 @@ public class Main extends JFrame implements ActionListener {
 							//
 						} else if ((texts = ObjectUtils.getIfNull(texts, ArrayList::new)) != null) {
 							//
-							if (numberStart != null && text.number != null
-									&& numberStart.intValue() > text.number.intValue()) {
+							if (unitStart != null && text.unit != null && unitStart.intValue() > text.unit.intValue()) {// unit
+								//
+								continue;
+								//
+							} else if (unitEnd != null && text.unit != null
+									&& unitEnd.intValue() < text.unit.intValue()) {// unit
+								//
+								continue;
+								//
+							} else if (numberStart != null && text.number != null
+									&& numberStart.intValue() > text.number.intValue()) {// number
 								//
 								continue;
 								//
 							} else if (numberEnd != null && text.number != null
-									&& numberEnd.intValue() < text.number.intValue()) {
+									&& numberEnd.intValue() < text.number.intValue()) {// number
 								//
 								continue;
 								//
@@ -288,7 +311,7 @@ public class Main extends JFrame implements ActionListener {
 
 		private String text, hiragana = null;
 
-		private Integer number = null;
+		private Integer unit, number = null;
 
 		public String getText() {
 			return text;
