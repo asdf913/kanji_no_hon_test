@@ -1,4 +1,4 @@
-package kanji_no_hon_test;
+package org.springframework.context.support;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
