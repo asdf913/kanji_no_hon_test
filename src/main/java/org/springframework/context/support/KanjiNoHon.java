@@ -40,6 +40,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.PropertyResolver;
 
 import com.google.common.reflect.Reflection;
 
@@ -49,13 +52,15 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import net.miginfocom.swing.MigLayout;
 
-public class KanjiNoHon extends JFrame implements ActionListener {
+public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAware {
 
 	private static final long serialVersionUID = -7531663604832571859L;
 
 	private static final String WRAP = "wrap";
 
 	private static final String GROWX = "growx";
+
+	private PropertyResolver propertyResolver = null;
 
 	private AbstractButton btnExecute = null;
 
@@ -64,23 +69,35 @@ public class KanjiNoHon extends JFrame implements ActionListener {
 	private KanjiNoHon() {
 	}
 
+	@Override
+	public void setEnvironment(final Environment environment) {
+		propertyResolver = environment;
+	}
+
 	private void init() {
 		//
 		add(new JLabel("Unit Range"));
 		//
-		add(tfUnitStart = new JTextField(), String.format("wmin %1$spx", 50));
+		add(tfUnitStart = new JTextField(
+				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.unitStart")),
+				String.format("wmin %1$spx", 50));
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfUnitEnd = new JTextField(), String.format("%1$s,wmin %2$spx", WRAP, 50));
+		add(tfUnitEnd = new JTextField(
+				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.unitEnd")),
+				String.format("%1$s,wmin %2$spx", WRAP, 50));
 		//
 		add(new JLabel("Number Range"));
 		//
-		add(tfNumberStart = new JTextField(), GROWX);
+		add(tfNumberStart = new JTextField(
+				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.numberStart")), GROWX);
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfNumberEnd = new JTextField(), String.format("%1$s,%2$s", WRAP, GROWX));
+		add(tfNumberEnd = new JTextField(
+				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.numberEnd")),
+				String.format("%1$s,%2$s", WRAP, GROWX));
 		//
 		add(new JLabel());
 		//
@@ -88,6 +105,10 @@ public class KanjiNoHon extends JFrame implements ActionListener {
 		//
 		btnExecute.addActionListener(this);
 		//
+	}
+
+	private static String getProperty(final PropertyResolver instance, final String key) {
+		return instance != null ? instance.getProperty(key) : null;
 	}
 
 	@Override
