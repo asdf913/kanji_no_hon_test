@@ -19,13 +19,14 @@
 				<tbody v-if="mode==='hiragana'">
 					<tr v-for="item in items" :class="item.answer!==null&&item.answer.length>0?(isCorrect(item)?'correct':'wrong'):''">
 						<td colspan="2">{{item.text}}</td>	
+						<td>{{item.hint}}</td>
 						<td><input type="text" v-model="item.answer"/></td>
 						<td><span v-if="item.answer!==null&&item.answer.length>0">{{isCorrect(item)?'&#x2714;':'&#x2718;'}}</span></td>
 					</tr>
 				</tbody>
 				<tbody v-if="mode==='text'">
 					<tr v-for="item in items" :class="item.answer!==null&&item.answer.length>0?(isCorrect(item)?'correct':'wrong'):''">
-						<td colspan="2">{{item.hiragana}}</td>	
+						<td colspan="2">{{item.hiragana}}</td>
 						<td><input type="text" v-model="item.answer"/></td>
 						<td><span v-if="item.answer!==null&&item.answer.length>0">{{isCorrect(item)?'&#x2714;':'&#x2718;'}}</span></td>
 					</tr>
@@ -50,7 +51,7 @@
 					 mode:null
 					,shuffle:null
 					,unit:"4"
-					,orginalItems:[<#list texts as text>{"text":"${text.text}","hiragana":"${text.hiragana}"}<#sep>,</#sep></#list>]
+					,orginalItems:[<#list texts as text>{"text":"${text.text}","hiragana":"${text.hiragana}","hint":"${text.hint!""}"}<#sep>,</#sep></#list>]
 				},methods:{
 					show:function(mode){
 						//

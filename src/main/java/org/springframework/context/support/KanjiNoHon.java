@@ -63,7 +63,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 	private PropertyResolver propertyResolver = null;
 
 	private String templateFile = null;
-	
+
 	private AbstractButton btnExecute = null;
 
 	private JTextComponent tfNumberStart, tfNumberEnd, tfUnitStart, tfUnitEnd = null;
@@ -336,7 +336,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 
 	public static class Text {
 
-		private String text, hiragana = null;
+		private String text, hiragana, hint = null;
 
 		private Integer unit, number = null;
 
@@ -346,6 +346,10 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 
 		public String getHiragana() {
 			return hiragana;
+		}
+
+		public String getHint() {
+			return hint;
 		}
 
 	}
