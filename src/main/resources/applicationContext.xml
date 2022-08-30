@@ -31,6 +31,8 @@
 			value="#{T(javax.swing.WindowConstants).EXIT_ON_CLOSE}" />
 		<property name="layout"
 			value="#{new net.miginfocom.swing.MigLayout()}" />
+		<property name="templateFile"
+			value="${org.springframework.context.support.VocabularyList.templateFile}" />
 	</bean>
 
 </beans>

@@ -62,11 +62,17 @@ public class VocabularyList extends JFrame implements ActionListener, Environmen
 
 	private PropertyResolver propertyResolver = null;
 
+	private String templateFile = null;
+
 	private AbstractButton btnExecute = null;
 
 	private JTextComponent tfChapterStart, tfChapterEnd, tfSectionStart, tfSectionEnd = null;
 
 	private VocabularyList() {
+	}
+
+	public void setTemplateFile(final String templateFile) {
+		this.templateFile = templateFile;
 	}
 
 	@Override
@@ -287,7 +293,7 @@ public class VocabularyList extends JFrame implements ActionListener, Environmen
 			//
 			try {
 				//
-				template = configuration.getTemplate("VocabularyList.html.ftl");
+				template = configuration.getTemplate(templateFile);
 				//
 			} catch (final IOException e) {
 				//
