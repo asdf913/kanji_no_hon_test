@@ -25,4 +25,12 @@
 			value="#{new net.miginfocom.swing.MigLayout()}" />
 	</bean>
 
+	<bean class="org.springframework.context.support.VocabularyList"
+		init-method="init">
+		<property name="defaultCloseOperation"
+			value="#{T(javax.swing.WindowConstants).EXIT_ON_CLOSE}" />
+		<property name="layout"
+			value="#{new net.miginfocom.swing.MigLayout()}" />
+	</bean>
+
 </beans>
