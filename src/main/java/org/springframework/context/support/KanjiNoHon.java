@@ -49,7 +49,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import net.miginfocom.swing.MigLayout;
 
-public class Main extends JFrame implements ActionListener {
+public class KanjiNoHon extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = -7531663604832571859L;
 
@@ -61,7 +61,7 @@ public class Main extends JFrame implements ActionListener {
 
 	private JTextComponent tfNumberStart, tfNumberEnd, tfUnitStart, tfUnitEnd = null;
 
-	private Main() {
+	private KanjiNoHon() {
 	}
 
 	private void init() {
@@ -257,7 +257,7 @@ public class Main extends JFrame implements ActionListener {
 				//
 			final Configuration configuration = new Configuration(Configuration.VERSION_2_3_31);
 			//
-			configuration.setTemplateLoader(new ClassTemplateLoader(Main.class, "/"));
+			configuration.setTemplateLoader(new ClassTemplateLoader(KanjiNoHon.class, "/"));
 			//
 			Template template = null;
 			//
@@ -325,7 +325,7 @@ public class Main extends JFrame implements ActionListener {
 
 	public static void main(final String[] args) {
 		//
-		final Main instance = new Main();
+		final KanjiNoHon instance = new KanjiNoHon();
 		//
 		instance.setLayout(new MigLayout("debug"));// TODO
 		//
