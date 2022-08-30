@@ -265,11 +265,11 @@ public class KanjiNoHon extends JFrame implements ActionListener {
 				//
 				template = configuration.getTemplate("template.html.ftl");
 				//
-			} catch (final IOException e1) {
+			} catch (final IOException e) {
 				//
 				// TODO Auto-generated catch block
 				//
-				e1.printStackTrace();
+				e.printStackTrace();
 				//
 			} // try
 				//
@@ -327,7 +327,7 @@ public class KanjiNoHon extends JFrame implements ActionListener {
 		//
 		final KanjiNoHon instance = new KanjiNoHon();
 		//
-		instance.setLayout(new MigLayout("debug"));// TODO
+		instance.setLayout(new MigLayout());// TODO
 		//
 		instance.init();
 		//
