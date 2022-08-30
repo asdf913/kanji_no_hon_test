@@ -62,6 +62,8 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 
 	private PropertyResolver propertyResolver = null;
 
+	private String templateFile = null;
+	
 	private AbstractButton btnExecute = null;
 
 	private JTextComponent tfNumberStart, tfNumberEnd, tfUnitStart, tfUnitEnd = null;
@@ -72,6 +74,10 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 	@Override
 	public void setEnvironment(final Environment environment) {
 		propertyResolver = environment;
+	}
+
+	public void setTemplateFile(final String templateFile) {
+		this.templateFile = templateFile;
 	}
 
 	private void init() {
@@ -284,7 +290,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 			//
 			try {
 				//
-				template = configuration.getTemplate("template.html.ftl");
+				template = configuration.getTemplate(templateFile);
 				//
 			} catch (final IOException e) {
 				//
