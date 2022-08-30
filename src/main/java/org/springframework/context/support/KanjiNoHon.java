@@ -302,7 +302,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 				//
 			if (template != null) {
 				//
-				try (final Writer w = new FileWriter(new File("test.html"))) {// TODO
+				try (final Writer w = new FileWriter(new File("KanjiNoHon.html"))) {// TODO
 					//
 					final Map<String, Object> data = new LinkedHashMap<>(Collections.singletonMap("texts", texts));
 					//
