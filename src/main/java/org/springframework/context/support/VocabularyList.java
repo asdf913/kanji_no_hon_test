@@ -50,6 +50,7 @@ import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import freemarker.template.TemplateUtil;
 import net.miginfocom.swing.MigLayout;
 
 public class VocabularyList extends JFrame implements ActionListener, EnvironmentAware {
@@ -303,23 +304,17 @@ public class VocabularyList extends JFrame implements ActionListener, Environmen
 				//
 			} // try
 				//
-			if (template != null) {
+			try (final Writer w = new FileWriter(new File("VocabularyList.html"))) {// TODO
 				//
-				try (final Writer w = new FileWriter(new File("VocabularyList.html"))) {// TODO
-					//
-					final Map<String, Object> data = new LinkedHashMap<>(Collections.singletonMap("texts", texts));
-					//
-					template.process(data, w);
-					//
-				} catch (final IOException | TemplateException e) {
-					//
-					// TODO Auto-generated catch block
-					//
-					e.printStackTrace();
-					//
-				} // try
-					//
-			} // if
+				TemplateUtil.process(template, new LinkedHashMap<>(Collections.singletonMap("texts", texts)), w);
+				//
+			} catch (final IOException | TemplateException e) {
+				//
+				// TODO Auto-generated catch block
+				//
+				e.printStackTrace();
+				//
+			} // try
 				//
 		} // if
 			//
