@@ -192,11 +192,14 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 								if ((intMap = ObjectUtils.getIfNull(intMap,
 										() -> Reflection.newProxy(IntMap.class, new IH()))) != null) {
 									//
-									intMap.setObject(cell.getColumnIndex(),
-											orElse(findFirst(testAndApply(Objects::nonNull, fs, Arrays::stream, null)
-													.filter(field -> Objects.equals(getName(field),
-															cell.getStringCellValue()))),
-													null));
+									intMap.setObject(cell.getColumnIndex(), orElse(findFirst(testAndApply(
+											Objects::nonNull, fs, Arrays::stream, null)
+											.filter(field -> Objects.equals(getName(field),
+													Objects.equals(cell.getCellType(), CellType.NUMERIC)
+															? Integer.toString(Double
+																	.valueOf(cell.getNumericCellValue()).intValue())
+															: cell.getStringCellValue()))),
+											null));
 									//
 								} // if
 									//
