@@ -1,6 +1,7 @@
 package org.springframework.context.support;
 
 import java.awt.Component;
+import java.awt.Frame;
 import java.awt.Window;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -48,6 +49,14 @@ public class Main {
 			if (instance instanceof Component) {
 				//
 				((Component) instance).setVisible(true);
+				//
+			} // if
+				//
+			final String key = String.format("%1$s.title", clz.getName());
+			//
+			if (instance instanceof Frame && environment != null && environment.containsProperty(key)) {
+				//
+				((Frame) instance).setTitle(PropertyResolverUtil.getProperty(environment, key));
 				//
 			} // if
 				//
