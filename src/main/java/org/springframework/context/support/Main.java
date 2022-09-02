@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.PropertyResolverUtil;
 
 public class Main {
 
@@ -26,8 +27,7 @@ public class Main {
 			final PropertyResolver environment = beanFactory.getEnvironment();
 			//
 			final Class<?> clz = forName(
-					environment != null ? environment.getProperty("org.springframework.context.support.Main.class")
-							: null);
+					PropertyResolverUtil.getProperty(environment, "org.springframework.context.support.Main.class"));
 			//
 			if (clz == null) {
 				//

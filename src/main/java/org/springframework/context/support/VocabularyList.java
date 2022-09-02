@@ -43,6 +43,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.PropertyResolverUtil;
 
 import com.google.common.reflect.Reflection;
 
@@ -85,26 +86,24 @@ public class VocabularyList extends JFrame implements ActionListener, Environmen
 		//
 		add(new JLabel("Chapter Range"));
 		//
-		add(tfSectionStart = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.VocabularyList.chapterStart")),
-				String.format("wmin %1$spx", 50));
+		add(tfSectionStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.VocabularyList.chapterStart")), String.format("wmin %1$spx", 50));
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfSectionEnd = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.VocabularyList.chapterEnd")),
+		add(tfSectionEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.VocabularyList.chapterEnd")),
 				String.format("%1$s,wmin %2$spx", WRAP, 50));
 		//
 		add(new JLabel("Section Range"));
 		//
-		add(tfChapterStart = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.VocabularyList.sectionStart")),
-				GROWX);
+		add(tfChapterStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.VocabularyList.sectionStart")), GROWX);
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfChapterEnd = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.VocabularyList.sectionEnd")),
+		add(tfChapterEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.VocabularyList.sectionEnd")),
 				String.format("%1$s,%2$s", WRAP, GROWX));
 		//
 		add(new JLabel());
@@ -113,10 +112,6 @@ public class VocabularyList extends JFrame implements ActionListener, Environmen
 		//
 		btnExecute.addActionListener(this);
 		//
-	}
-
-	private static String getProperty(final PropertyResolver instance, final String key) {
-		return instance != null ? instance.getProperty(key) : null;
 	}
 
 	@Override

@@ -43,6 +43,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
+import org.springframework.core.env.PropertyResolverUtil;
 
 import com.google.common.reflect.Reflection;
 
@@ -85,26 +86,24 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 		//
 		add(new JLabel("Unit Range"));
 		//
-		add(tfUnitStart = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.unitStart")),
-				String.format("wmin %1$spx", 50));
+		add(tfUnitStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.KanjiNoHon.unitStart")), String.format("wmin %1$spx", 50));
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfUnitEnd = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.unitEnd")),
+		add(tfUnitEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.KanjiNoHon.unitEnd")),
 				String.format("%1$s,wmin %2$spx", WRAP, 50));
 		//
 		add(new JLabel("Number Range"));
 		//
-		add(tfNumberStart = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.numberStart")), GROWX);
+		add(tfNumberStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.KanjiNoHon.numberStart")), GROWX);
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfNumberEnd = new JTextField(
-				getProperty(propertyResolver, "org.springframework.context.support.KanjiNoHon.numberEnd")),
-				String.format("%1$s,%2$s", WRAP, GROWX));
+		add(tfNumberEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+				"org.springframework.context.support.KanjiNoHon.numberEnd")), String.format("%1$s,%2$s", WRAP, GROWX));
 		//
 		add(new JLabel());
 		//
@@ -112,10 +111,6 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 		//
 		btnExecute.addActionListener(this);
 		//
-	}
-
-	private static String getProperty(final PropertyResolver instance, final String key) {
-		return instance != null ? instance.getProperty(key) : null;
 	}
 
 	@Override
