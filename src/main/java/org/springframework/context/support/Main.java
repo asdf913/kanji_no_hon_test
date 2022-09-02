@@ -3,13 +3,21 @@ package org.springframework.context.support;
 import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Window;
+import java.lang.reflect.Proxy;
+import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.PropertyResolver;
@@ -27,9 +35,26 @@ public class Main {
 			//
 			final PropertyResolver environment = beanFactory.getEnvironment();
 			//
-			final Class<?> clz = forName(
+			Class<?> clz = forName(
 					PropertyResolverUtil.getProperty(environment, "org.springframework.context.support.Main.class"));
 			//
+			if (clz == null) {
+				//
+				final Map<String, Window> windows = getBeansOfType(beanFactory, Window.class);
+				//
+				final ComboBoxModel<String> cbm = testAndApply(Objects::nonNull,
+						toArray(windows.keySet(), new String[] {}), DefaultComboBoxModel::new,
+						x -> new DefaultComboBoxModel<>());
+				//
+				if (JOptionPane.showConfirmDialog(null, new JComboBox<>(cbm), null,
+						JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION) {
+					//
+					clz = getClass(get(windows, cbm != null ? cbm.getSelectedItem() : null));
+					//
+				} // if
+					//
+			} // if
+				//
 			if (clz == null) {
 				//
 				JOptionPane.showMessageDialog(null, "java.lang.Class is null");
@@ -64,6 +89,43 @@ public class Main {
 			//
 	}
 
+	private static <V> V get(final Map<?, V> instance, final Object key) {
+		return instance != null ? instance.get(key) : null;
+	}
+
+	private static String toString(final Object instance) {
+		return instance != null ? instance.toString() : null;
+	}
+
+	private static <T> T[] toArray(final Collection<T> instance, final T[] array) {
+		//
+		return instance != null && (array != null || Proxy.isProxyClass(getClass(instance))) ? instance.toArray(array)
+				: null;
+		//
+	}
+
+	private static Class<?> getClass(final Object instance) {
+		return instance != null ? instance.getClass() : null;
+	}
+
+	private static <T, R, E extends Throwable> R testAndApply(final Predicate<T> predicate, final T value,
+			final FailableFunction<T, R, E> functionTrue, final FailableFunction<T, R, E> functionFalse) throws E {
+		return test(predicate, value) ? apply(functionTrue, value) : apply(functionFalse, value);
+	}
+
+	private static final <T> boolean test(final Predicate<T> instance, final T value) {
+		return instance != null && instance.test(value);
+	}
+
+	private static <T, R, E extends Throwable> R apply(final FailableFunction<T, R, E> instance, final T value)
+			throws E {
+		return instance != null ? instance.apply(value) : null;
+	}
+
+	private static <T> Map<String, T> getBeansOfType(final ListableBeanFactory instance, final Class<T> type) {
+		return instance != null ? instance.getBeansOfType(type) : null;
+	}
+
 	private static Class<?> forName(final String className) {
 		try {
 			return StringUtils.isNotBlank(className) ? Class.forName(className) : null;
@@ -83,7 +145,7 @@ public class Main {
 			//
 		} // if
 			//
-		final Map<?, ?> beans = beanFactory != null ? beanFactory.getBeansOfType(clz) : null;
+		final Map<?, ?> beans = getBeansOfType(beanFactory, clz);
 		//
 		if (beans == null) {
 			//
