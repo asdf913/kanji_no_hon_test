@@ -47,4 +47,16 @@
 			value="${org.springframework.context.support.QuestionGenerator.templateFile}" />
 	</bean>
 
+	<bean class="org.springframework.context.support.Katsuyou"
+		init-method="init">
+		<property name="defaultCloseOperation"
+			value="#{T(javax.swing.WindowConstants).EXIT_ON_CLOSE}" />
+		<property name="layout"
+			value="#{new net.miginfocom.swing.MigLayout()}" />
+		<property name="templateFile"
+			value="${org.springframework.context.support.Katsuyou.templateFile}" />
+		<property name="katsuyouPageUrl"
+			value="${org.springframework.context.support.Katsuyou.katsuyouPageUrl}" />
+	</bean>
+
 </beans>
