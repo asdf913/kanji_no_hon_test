@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
@@ -36,7 +34,6 @@ import javax.swing.JLabel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -688,30 +685,12 @@ public class Katsuyou extends JFrame implements ActionListener, EnvironmentAware
 
 	}
 
-	private static <T, R, E extends Throwable> R testAndApply(final Predicate<T> predicate, final T value,
-			final FailableFunction<T, R, E> functionTrue, final FailableFunction<T, R, E> functionFalse) throws E {
-		return test(predicate, value) ? apply(functionTrue, value) : apply(functionFalse, value);
-	}
-
-	private static final <T> boolean test(final Predicate<T> instance, final T value) {
-		return instance != null && instance.test(value);
-	}
-
-	private static <T, R, E extends Throwable> R apply(final FailableFunction<T, R, E> instance, final T value)
-			throws E {
-		return instance != null ? instance.apply(value) : null;
-	}
-
 	private static <T> Optional<T> findFirst(final Stream<T> instance) {
 		return instance != null ? instance.findFirst() : null;
 	}
 
 	private static <T> T orElse(final Optional<T> instance, final T other) {
 		return instance != null ? instance.orElse(other) : null;
-	}
-
-	private static String getName(final Member instance) {
-		return instance != null ? instance.getName() : null;
 	}
 
 }
