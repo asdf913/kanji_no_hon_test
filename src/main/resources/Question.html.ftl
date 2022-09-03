@@ -54,7 +54,7 @@
 				,data:{
 					 shuffle:null
 					,unit:"4"
-					,orginalQuestions:[
+					,originalQuestions:[
 						<#list questions as question>
 							{
 								 "chapter":${question.chapter!"null"}
@@ -77,7 +77,7 @@
 				},methods:{
 					show:function(){
 						//
-						var questions=JSON.parse(JSON.stringify(this.orginalQuestions));
+						var questions=JSON.parse(JSON.stringify(this.originalQuestions));
 						//
 						//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 						//

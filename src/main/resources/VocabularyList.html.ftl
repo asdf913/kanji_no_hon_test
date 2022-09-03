@@ -52,13 +52,13 @@
 					 mode:null
 					,shuffle:null
 					,unit:"4"
-					,orginalItems:[<#list texts as text>{"text":"${text.text!""}","hiragana":"${text.hiragana!""}"}<#sep>,</#sep></#list>]
+					,originalItems:[<#list texts as text>{"text":"${text.text!""}","hiragana":"${text.hiragana!""}"}<#sep>,</#sep></#list>]
 				},methods:{
 					show:function(mode){
 						//
 						this.mode=mode;
 						//
-						var items=JSON.parse(JSON.stringify(this.orginalItems));
+						var items=JSON.parse(JSON.stringify(this.originalItems));
 						//
 						//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 						//
