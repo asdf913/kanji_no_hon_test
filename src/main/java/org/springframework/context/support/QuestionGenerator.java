@@ -150,6 +150,8 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 				//
 				Integer integer = null;
 				//
+				Boolean B = null;
+				//
 				IntMap<Field> intMap = null;
 				//
 				final Integer chapterStart = valueOf(getText(tfChapterStart));
@@ -163,6 +165,8 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 				Comment comment = null;
 				//
 				Text text = null;
+				//
+				CellType cellType = null;
 				//
 				for (final Sheet sheet : workbook) {
 					//
@@ -212,12 +216,14 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									//
 							} else if (intMap != null && intMap.containsKey(columnIndex = cell.getColumnIndex())
 									&& (f = intMap.getObject(columnIndex)) != null) {
+								//
+								cellType = cell.getCellType();
 								// //
 								f.setAccessible(true);
 								//
 								if (Objects.equals(f.getType(), String.class)) {
 									//
-									if (Objects.equals(cell.getCellType(), CellType.NUMERIC)) {
+									if (Objects.equals(cellType, CellType.NUMERIC)) {
 										//
 										string = Double.toString(cell.getNumericCellValue());
 										//
@@ -231,7 +237,7 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									//
 								} else if (Objects.equals(f.getType(), Integer.class)) {
 									//
-									if (Objects.equals(cell.getCellType(), CellType.NUMERIC)) {
+									if (Objects.equals(cellType, CellType.NUMERIC)) {
 										//
 										integer = Integer
 												.valueOf(Double.valueOf(cell.getNumericCellValue()).intValue());
@@ -243,6 +249,27 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									} // if
 										//
 									f.set(question = ObjectUtils.getIfNull(question, Question::new), integer);
+									//
+								} else if (Objects.equals(f.getType(), Boolean.class)) {
+									//
+									if (Objects.equals(cellType, CellType.BOOLEAN)) {
+										//
+										B = Boolean.valueOf(cell.getBooleanCellValue());
+										//
+									} else if (Objects.equals(cellType, CellType.NUMERIC)) {
+										//
+										B = StringUtils.isNotBlank(string = Double.toString(cell.getNumericCellValue()))
+												? Boolean.valueOf(string)
+												: null;
+										//
+									} else if (Objects.equals(cellType, CellType.STRING)
+											&& StringUtils.isNotBlank(string = cell.getStringCellValue())) {
+										//
+										B = Boolean.valueOf(string);
+										//
+									} // if
+										//
+									f.set(question = ObjectUtils.getIfNull(question, Question::new), B);
 									//
 								} // if
 									//
@@ -377,6 +404,8 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 		private Integer chapter, section = null;
 
+		private Boolean fukushuu = null;
+
 		private List<Text> texts = null;
 
 		public Integer getChapter() {
@@ -385,6 +414,10 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 		public Integer getSection() {
 			return section;
+		}
+
+		public Boolean getFukushuu() {
+			return fukushuu;
 		}
 
 		public List<Text> getTexts() {
