@@ -89,23 +89,23 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 		//
 		add(new JLabel("Chapter Range"));
 		//
-		add(tfSectionStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+		add(tfChapterStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
 				"org.springframework.context.support.VocabularyList.chapterStart")), String.format("wmin %1$spx", 50));
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfSectionEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+		add(tfChapterEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
 				"org.springframework.context.support.VocabularyList.chapterEnd")),
 				String.format("%1$s,wmin %2$spx", WRAP, 50));
 		//
 		add(new JLabel("Section Range"));
 		//
-		add(tfChapterStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+		add(tfSectionStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
 				"org.springframework.context.support.VocabularyList.sectionStart")), GROWX);
 		//
 		add(new JLabel(" - "));
 		//
-		add(tfChapterEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
+		add(tfSectionEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
 				"org.springframework.context.support.VocabularyList.sectionEnd")),
 				String.format("%1$s,%2$s", WRAP, GROWX));
 		//
