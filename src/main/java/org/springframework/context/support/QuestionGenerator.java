@@ -90,23 +90,24 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 		add(new JLabel("Chapter Range"));
 		//
 		add(tfChapterStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
-				"org.springframework.context.support.VocabularyList.chapterStart")), String.format("wmin %1$spx", 50));
+				"org.springframework.context.support.QuestionGenerator.chapterStart")),
+				String.format("wmin %1$spx", 50));
 		//
 		add(new JLabel(" - "));
 		//
 		add(tfChapterEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
-				"org.springframework.context.support.VocabularyList.chapterEnd")),
+				"org.springframework.context.support.QuestionGenerator.chapterEnd")),
 				String.format("%1$s,wmin %2$spx", WRAP, 50));
 		//
 		add(new JLabel("Section Range"));
 		//
 		add(tfSectionStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
-				"org.springframework.context.support.VocabularyList.sectionStart")), GROWX);
+				"org.springframework.context.support.QuestionGenerator.sectionStart")), GROWX);
 		//
 		add(new JLabel(" - "));
 		//
 		add(tfSectionEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
-				"org.springframework.context.support.VocabularyList.sectionEnd")),
+				"org.springframework.context.support.QuestionGenerator.sectionEnd")),
 				String.format("%1$s,%2$s", WRAP, GROWX));
 		//
 		add(new JLabel());
