@@ -38,7 +38,10 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.Comment;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -164,13 +167,17 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 				//
 				final Integer sectionEnd = valueOf(getText(tfSectionEnd));
 				//
-				Comment comment = null;
-				//
 				Text text = null;
 				//
 				CellType cellType = null;
 				//
 				String[] comments = null;
+				//
+				CreationHelper creationHelper = null;
+				//
+				FormulaEvaluator formulaEvaluator = null;
+				//
+				CellValue cellValue = null;
 				//
 				for (final Sheet sheet : workbook) {
 					//
@@ -256,6 +263,8 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									//
 								} else if (Objects.equals(f.getType(), Boolean.class)) {
 									//
+									B = null;
+									//
 									if (Objects.equals(cellType, CellType.BOOLEAN)) {
 										//
 										B = Boolean.valueOf(cell.getBooleanCellValue());
@@ -271,6 +280,23 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 										//
 										B = Boolean.valueOf(string);
 										//
+									} else if (Objects.equals(cellType, CellType.FORMULA)) {
+										//
+										if (formulaEvaluator == null && (creationHelper = ObjectUtils
+												.getIfNull(creationHelper, workbook::getCreationHelper)) != null) {
+											//
+											formulaEvaluator = creationHelper.createFormulaEvaluator();
+											//
+										} // if
+											//
+										if ((cellValue = formulaEvaluator != null ? formulaEvaluator.evaluate(cell)
+												: null) != null
+												&& Objects.equals(CellType.BOOLEAN, cellValue.getCellType())) {
+											//
+											B = cellValue.getBooleanValue();
+											//
+										} // if
+											//
 									} // if
 										//
 									f.set(question = ObjectUtils.getIfNull(question, Question::new), B);
@@ -279,8 +305,7 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									//
 							} else {
 								//
-								if ((comments = StringUtils
-										.split(getString(getString(comment = cell.getCellComment())))) != null
+								if ((comments = StringUtils.split(getString(getString(cell.getCellComment())))) != null
 										&& comments.length > 0) {
 									//
 									if (Objects.equals("A", comments[0])) {
