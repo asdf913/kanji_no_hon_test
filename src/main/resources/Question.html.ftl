@@ -20,7 +20,8 @@
 					<tr v-for="question in questions">
 						<td>{{question.chapter}}</td>
 						<td style="white-space:nowrap"><slot v-if="typeof question=='object'&&question!==null&&typeof question.fukushuu==='boolean'&&question.fukushuu">復習&nbsp;-&nbsp;</slot>{{question.section}}</td>
-						<td>{{question.prefix!""}}</td>
+						<td>{{question.number}}</td>
+						<td style="white-space:nowrap">{{question.prefix}}</td>
 						<td>
 							<slot v-if="typeof question=='object'&&question!==null&&typeof question.texts==='object'&&question.texts!==null&&typeof question.texts.length==='number'">
 								<slot v-for="item in question.texts">
@@ -66,6 +67,7 @@
 							{
 								 "chapter" :${question.chapter!"null"}
 								,"section" :${question.section!"null"}
+								,"number"  :<#if question.number??>"${question.number}"<#else>null</#if>
 								,"prefix"  :<#if question.prefix??>"${question.prefix}"<#else>null</#if>
 								,"fukushuu":
 								<#if question?? && question.fukushuu?? && question.fukushuu?is_boolean>

@@ -482,7 +482,7 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 		private List<Text> texts = null;
 
-		private String prefix = null;
+		private String number, prefix = null;
 
 		public Integer getChapter() {
 			return chapter;
@@ -498,6 +498,10 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 		public List<Text> getTexts() {
 			return texts;
+		}
+
+		public String getNumber() {
+			return number;
 		}
 
 		public String getPrefix() {
