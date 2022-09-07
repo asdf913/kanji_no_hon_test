@@ -459,7 +459,7 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 	public static class Text {
 
-		private String text, answer = null;
+		private String text, answer, prefix = null;
 
 		public String getText() {
 			return text;
@@ -467,6 +467,10 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 		public String getAnswer() {
 			return answer;
+		}
+
+		public String getPrefix() {
+			return prefix;
 		}
 
 	}

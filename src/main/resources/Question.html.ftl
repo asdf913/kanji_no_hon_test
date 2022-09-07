@@ -19,11 +19,10 @@
 				<tbody>
 					<tr v-for="question in questions">
 						<td>{{question.chapter}}</td>
+						<td><slot v-if="typeof question=='object'&&question!==null&&typeof question.fukushuu==='boolean'&&question.fukushuu">復習&nbsp;-&nbsp;</slot>{{question.section}}</td>
+						<td>{{question.prefix!""}}</td>
 						<td>
-						<slot v-if="typeof question=='object'&&question!==null&&typeof question.fukushuu==='boolean'&&question.fukushuu">復習&nbsp;-&nbsp;</slot>{{question.section}}</td>
-						<slot v-if="typeof question=='object'&&question!==null&&typeof question.length==='number'">
-							<td>
-							<slot v-if="question!==null && typeof question.texts==='object' && question.texts!==null">
+							<slot v-if="typeof question=='object'&&question!==null&&typeof question.texts==='object'&&question.texts!==null&&typeof question.texts.length==='number'">
 								<slot v-for="item in question.texts">
 									<slot v-if="typeof item.text==='string'">{{item.text}}</slot>
 									<slot v-if="typeof item.answer==='string'&&item.answer!==null&&typeof item.answer.length==='number'&&item.answer.length>0">
@@ -31,8 +30,7 @@
 									</slot>
 								</slot>
 							</slot>
-							</td>
-						</slot>
+						</td>
 					</tr>
 				</tbody>
 				</tbody>
@@ -60,6 +58,7 @@
 							{
 								 "chapter" :${question.chapter!"null"}
 								,"section" :${question.section!"null"}
+								,"prefix"  :${question.prefix !"null"}
 								,"fukushuu":
 								<#if question?? && question.fukushuu?? && question.fukushuu?is_boolean>
 								${question.fukushuu?string}
