@@ -276,9 +276,10 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									//
 							} else {
 								//
-								if ((comment = cell.getCellComment()) != null) {
+								if ((comment = cell.getCellComment()) != null
+										&& Objects.equals("A", getString(getString(comment)))) {
 									//
-									(text = new Text()).answer = getString(getString(comment));
+									(text = new Text()).answer = cell.getStringCellValue();
 									//
 								} else {
 									//
@@ -302,6 +303,12 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 							//
 						} else if ((questions = ObjectUtils.getIfNull(questions, ArrayList::new)) != null) {
 							//
+							if (!containsNonNullValue(question)) {
+								//
+								continue;
+								//
+							} // if
+								//
 							if (chapterStart != null && question.chapter != null
 									&& chapterStart.intValue() > question.chapter.intValue()) {// chapter
 								//
@@ -373,6 +380,29 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 				//
 		} // if
 			//
+	}
+
+	private static boolean containsNonNullValue(final Object instance) throws IllegalAccessException {
+		//
+		final Field[] fs = testAndApply(Objects::nonNull, instance != null ? instance.getClass() : null,
+				FieldUtils::getAllFields, null);
+		//
+		Field f = null;
+		//
+		for (int i = 0; fs != null && i < fs.length; i++) {
+			//
+			if ((f = fs[i]) == null || f.get(instance) == null) {
+				//
+				continue;
+				//
+			} // if
+				//
+			return true;
+			//
+		} // if
+			//
+		return false;
+		//
 	}
 
 	private static <E> void add(final Collection<E> items, final E item) {
