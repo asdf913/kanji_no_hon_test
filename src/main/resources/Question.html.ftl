@@ -19,8 +19,9 @@
 				<tbody>
 					<tr v-for="question in questions">
 						<td>{{question.chapter}}</td>
-						<td><slot v-if"typeof question=='object'&&question!==null&&typeof question.fukushuu==='boolean'&&question.fukushuu">復習&nbsp;-&nbsp;</slot>{{question.section}}</td>
-						<slot v-if"typeof question=='object'&&question!==null&&typeof question.length==='number'">
+						<td>
+						<slot v-if="typeof question=='object'&&question!==null&&typeof question.fukushuu==='boolean'&&question.fukushuu">復習&nbsp;-&nbsp;</slot>{{question.section}}</td>
+						<slot v-if="typeof question=='object'&&question!==null&&typeof question.length==='number'">
 							<td>
 							<slot v-if="question!==null && typeof question.texts==='object' && question.texts!==null">
 								<slot v-for="item in question.texts">
