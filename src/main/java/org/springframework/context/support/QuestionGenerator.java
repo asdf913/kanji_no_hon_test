@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -169,6 +170,8 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 				//
 				CellType cellType = null;
 				//
+				String[] comments = null;
+				//
 				for (final Sheet sheet : workbook) {
 					//
 					if (sheet == null || sheet.iterator() == null) {
@@ -276,11 +279,26 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 									//
 							} else {
 								//
-								if ((comment = cell.getCellComment()) != null
-										&& Objects.equals("A", getString(getString(comment)))) {
+								if ((comments = StringUtils
+										.split(getString(getString(comment = cell.getCellComment())))) != null
+										&& comments.length > 0) {
 									//
-									(text = new Text()).answer = cell.getStringCellValue();
-									//
+									if (Objects.equals("A", comments[0])) {
+										//
+										(text = new Text()).answer = cell.getStringCellValue();
+										//
+									} /// if
+										//
+									if (comments.length > 1) {
+										//
+										if (text == null) {
+											text = new Text();
+										} // if
+											//
+										text.choices = Arrays.asList(ArrayUtils.subarray(comments, 1, comments.length));
+										//
+									} // if
+										//
 								} else {
 									//
 									(text = new Text()).text = cell.getStringCellValue();
@@ -467,12 +485,18 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 
 		private String text, answer = null;
 
+		private List<String> choices = null;
+
 		public String getText() {
 			return text;
 		}
 
 		public String getAnswer() {
 			return answer;
+		}
+
+		public List<String> getChoices() {
+			return choices;
 		}
 
 	}

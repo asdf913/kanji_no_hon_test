@@ -26,7 +26,15 @@
 								<slot v-for="item in question.texts">
 									<slot v-if="typeof item.text==='string'">{{item.text}}</slot>
 									<slot v-if="typeof item.answer==='string'&&item.answer!==null&&typeof item.answer.length==='number'&&item.answer.length>0">
-										<input type="text" v-model="item.input" :class="item.input!==null&&item.input.length>0?(isCorrect(item)?'correct':'wrong'):''"/>
+										<slot v-if="typeof item.choices==='object'&&item.choices!==null&&typeof item.choices.length==='number'&&item.choices.length>1">
+											<select v-model="item.input" :class="item.input!==null&&item.input.length>0?(isCorrect(item)?'correct':'wrong'):''">
+												<option></option>
+												<option v-for="choice in item.choices">{{choice}}</option>
+											</select>
+										</slot>
+										<slot v-else>
+											<input type="text" v-model="item.input" :class="item.input!==null&&item.input.length>0?(isCorrect(item)?'correct':'wrong'):''"/>
+										</slot>
 									</slot>
 								</slot>
 							</slot>
@@ -67,7 +75,11 @@
 									<#if question.texts??>
 										[
 										<#list question.texts as text>
-											{"text":"${text.text!""}","answer":"${text.answer!""}"}
+											{"text":"${text.text!""}","answer":"${text.answer!""}"
+											<#if text.choices??>
+												,"choices":[<#list text.choices as choice>"${choice!""}"<#sep>,</#sep></#list>]
+											</#if>		
+											}
 											<#sep>,</#sep>
 										</#list>
 										]
