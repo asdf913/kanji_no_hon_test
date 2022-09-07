@@ -58,7 +58,7 @@
 							{
 								 "chapter" :${question.chapter!"null"}
 								,"section" :${question.section!"null"}
-								,"prefix"  :${question.prefix !"null"}
+								,"prefix"  :<#if question.prefix??>"${question.prefix}"<#else>null</#if>
 								,"fukushuu":
 								<#if question?? && question.fukushuu?? && question.fukushuu?is_boolean>
 								${question.fukushuu?string}
