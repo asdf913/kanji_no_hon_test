@@ -51,7 +51,7 @@
 					 mode:null
 					,shuffle:null
 					,unit:"4"
-					,originalItems:[<#list texts as text>{"text":"${text.text}","hiragana":"${text.hiragana}","hint":"${text.hint!""}"}<#sep>,</#sep></#list>]
+					,originalItems:[<#if texts??><#list texts as text>{"text":"${text.text}","hiragana":"${text.hiragana}","hint":"${text.hint!""}"}<#sep>,</#sep></#list></#if>]
 				},methods:{
 					show:function(mode){
 						//

@@ -296,7 +296,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 				//
 			List<Text> texts = null;
 			//
-			try (final Workbook workbook = new XSSFWorkbook(file)) {
+			try (final Workbook workbook = file != null ? new XSSFWorkbook(file) : null) {
 				//
 				Text text = null;
 				//
@@ -322,122 +322,127 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 				//
 				final Integer numberEnd = valueOf(getText(tfNumberEnd));
 				//
-				for (final Sheet sheet : workbook) {
+				if (workbook != null) {
 					//
-					if (sheet == null || sheet.iterator() == null) {
+					for (final Sheet sheet : workbook) {
 						//
-						continue;
-						//
-					} // if
-						//
-					first = true;
-					//
-					for (final Row row : sheet) {
-						//
-						text = new Text();
-						//
-						if (row == null || row.iterator() == null) {
+						if (sheet == null || sheet.iterator() == null) {
+							//
 							continue;
+							//
 						} // if
 							//
-						for (final Cell cell : row) {
+						first = true;
+						//
+						for (final Row row : sheet) {
 							//
+							text = new Text();
+							//
+							if (row == null || row.iterator() == null) {
+								continue;
+							} // if
+								//
+							for (final Cell cell : row) {
+								//
+								if (first) {
+									//
+									if (fs == null) {
+										//
+										fs = FieldUtils.getAllFields(Text.class);
+										//
+									} // if
+										//
+									if ((intMap = ObjectUtils.getIfNull(intMap,
+											() -> Reflection.newProxy(IntMap.class, new IH()))) != null) {
+										//
+										intMap.setObject(cell.getColumnIndex(), orElse(findFirst(testAndApply(
+												Objects::nonNull, fs, Arrays::stream, null)
+												.filter(field -> Objects.equals(getName(field),
+														Objects.equals(cell.getCellType(), CellType.NUMERIC)
+																? Integer.toString(Double
+																		.valueOf(cell.getNumericCellValue()).intValue())
+																: cell.getStringCellValue()))),
+												null));
+										//
+									} // if
+										//
+								} else if (intMap != null && intMap.containsKey(columnIndex = cell.getColumnIndex())
+										&& (f = intMap.getObject(columnIndex)) != null) {
+									// //
+									f.setAccessible(true);
+									//
+									if (Objects.equals(f.getType(), String.class)) {
+										//
+										if (Objects.equals(cell.getCellType(), CellType.NUMERIC)) {
+											//
+											string = Double.toString(cell.getNumericCellValue());
+											//
+										} else {
+											//
+											string = cell.getStringCellValue();
+											//
+										} // if
+											//
+										f.set(text = ObjectUtils.getIfNull(text, Text::new), string);
+										//
+									} else if (Objects.equals(f.getType(), Integer.class)) {
+										//
+										if (Objects.equals(cell.getCellType(), CellType.NUMERIC)) {
+											//
+											integer = Integer
+													.valueOf(Double.valueOf(cell.getNumericCellValue()).intValue());
+											//
+										} else {
+											//
+											integer = valueOf(cell.getStringCellValue());
+											//
+										} // if
+											//
+										f.set(text = ObjectUtils.getIfNull(text, Text::new), integer);
+										//
+									} // if
+										//
+								} // if
+									//
+							} // for
+								//
 							if (first) {
 								//
-								if (fs == null) {
-									//
-									fs = FieldUtils.getAllFields(Text.class);
-									//
-								} // if
-									//
-								if ((intMap = ObjectUtils.getIfNull(intMap,
-										() -> Reflection.newProxy(IntMap.class, new IH()))) != null) {
-									//
-									intMap.setObject(cell.getColumnIndex(), orElse(findFirst(testAndApply(
-											Objects::nonNull, fs, Arrays::stream, null)
-											.filter(field -> Objects.equals(getName(field),
-													Objects.equals(cell.getCellType(), CellType.NUMERIC)
-															? Integer.toString(Double
-																	.valueOf(cell.getNumericCellValue()).intValue())
-															: cell.getStringCellValue()))),
-											null));
-									//
-								} // if
-									//
-							} else if (intMap != null && intMap.containsKey(columnIndex = cell.getColumnIndex())
-									&& (f = intMap.getObject(columnIndex)) != null) {
-								// //
-								f.setAccessible(true);
+								first = false;
 								//
-								if (Objects.equals(f.getType(), String.class)) {
+							} else if ((texts = ObjectUtils.getIfNull(texts, ArrayList::new)) != null) {
+								//
+								if (unitStart != null && text.unit != null
+										&& unitStart.intValue() > text.unit.intValue()) {// unit
 									//
-									if (Objects.equals(cell.getCellType(), CellType.NUMERIC)) {
-										//
-										string = Double.toString(cell.getNumericCellValue());
-										//
-									} else {
-										//
-										string = cell.getStringCellValue();
-										//
-									} // if
-										//
-									f.set(text = ObjectUtils.getIfNull(text, Text::new), string);
+									continue;
 									//
-								} else if (Objects.equals(f.getType(), Integer.class)) {
+								} else if (unitEnd != null && text.unit != null
+										&& unitEnd.intValue() < text.unit.intValue()) {// unit
 									//
-									if (Objects.equals(cell.getCellType(), CellType.NUMERIC)) {
-										//
-										integer = Integer
-												.valueOf(Double.valueOf(cell.getNumericCellValue()).intValue());
-										//
-									} else {
-										//
-										integer = valueOf(cell.getStringCellValue());
-										//
-									} // if
-										//
-									f.set(text = ObjectUtils.getIfNull(text, Text::new), integer);
+									continue;
 									//
-								} // if
+								} else if (numberStart != null && text.number != null
+										&& numberStart.intValue() > text.number.intValue()) {// number
 									//
+									continue;
+									//
+								} else if (numberEnd != null && text.number != null
+										&& numberEnd.intValue() < text.number.intValue()) {// number
+									//
+									continue;
+									//
+								} //
+									//
+								texts.add(text);
+								//
 							} // if
 								//
 						} // for
 							//
-						if (first) {
-							//
-							first = false;
-							//
-						} else if ((texts = ObjectUtils.getIfNull(texts, ArrayList::new)) != null) {
-							//
-							if (unitStart != null && text.unit != null && unitStart.intValue() > text.unit.intValue()) {// unit
-								//
-								continue;
-								//
-							} else if (unitEnd != null && text.unit != null
-									&& unitEnd.intValue() < text.unit.intValue()) {// unit
-								//
-								continue;
-								//
-							} else if (numberStart != null && text.number != null
-									&& numberStart.intValue() > text.number.intValue()) {// number
-								//
-								continue;
-								//
-							} else if (numberEnd != null && text.number != null
-									&& numberEnd.intValue() < text.number.intValue()) {// number
-								//
-								continue;
-								//
-							} //
-								//
-							texts.add(text);
-							//
-						} // if
-							//
 					} // for
 						//
-				} // for
+				} // if
 					//
 			} catch (final InvalidFormatException | IOException | IllegalAccessException e) {
 				//
@@ -465,11 +470,24 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 				//
 			} // try
 				//
-			try (final Writer w = new FileWriter(new File("KanjiNoHon.html"))) {// TODO
+			try (final Writer w = testAndApply(
+					Objects::nonNull, testAndApply(Objects::nonNull,
+							StringUtils.defaultIfBlank(getFileName(), "KanjiNoHon.html"), File::new, null),
+					FileWriter::new, null)) {
 				//
-				TemplateUtil.process(template, new LinkedHashMap<>(Collections.singletonMap("texts", texts)), w);
+				if (w != null) {
+					//
+					TemplateUtil.process(template, new LinkedHashMap<>(Collections.singletonMap("texts", texts)), w);
+					//
+				} // if
+					//
+			} catch (final IOException | TemplateException | InstantiationException | IllegalAccessException e) {
 				//
-			} catch (final IOException | TemplateException e) {
+				// TODO Auto-generated catch block
+				//
+				e.printStackTrace();
+				//
+			} catch (final InvocationTargetException e) {
 				//
 				// TODO Auto-generated catch block
 				//
@@ -528,17 +546,8 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			//
 		try {
 			//
-			setText(tfFileName, null);
+			setText(tfFileName, getFileName());
 			//
-			final FileNameGenerator fileNameGenerator = cast(FileNameGenerator.class,
-					constructor != null ? constructor.newInstance() : null);
-			//
-			if (fileNameGenerator != null && tfFileName != null) {
-				//
-				setText(tfFileName, fileNameGenerator.genereate(this));
-				//
-			} // if
-				//
 		} catch (final InstantiationException | IllegalAccessException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -547,6 +556,35 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			e.printStackTrace();
 		} // if
 			//
+	}
+
+	private String getFileName() throws InstantiationException, IllegalAccessException, InvocationTargetException {
+		//
+		final Class<?> clz = cbmClass != null ? cast(Class.class, cbmClass.getSelectedItem()) : null;
+		//
+		final List<Constructor<?>> cs = toList(
+				filter(testAndApply(Objects::nonNull, clz != null ? clz.getDeclaredConstructors() : null,
+						Arrays::stream, null), c -> c != null && c.getParameterCount() == 0));
+		//
+		Constructor<?> constructor = null;
+		//
+		if (cs != null && !cs.isEmpty()) {
+			//
+			if (cs.size() > 1) {
+				//
+				throw new IllegalStateException();
+				//
+			} // if
+				//
+			constructor = cs.get(0);
+			//
+		} // if
+			//
+		final FileNameGenerator fileNameGenerator = cast(FileNameGenerator.class,
+				constructor != null ? constructor.newInstance() : null);
+		//
+		return fileNameGenerator != null ? fileNameGenerator.genereate(this) : null;
+		//
 	}
 
 	private static <T> List<T> toList(final Stream<T> instance) {
