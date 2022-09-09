@@ -37,7 +37,9 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -138,6 +140,17 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 		//
 		jcbClass.addActionListener(this);
 		//
+		final ListCellRenderer listCellRenderer = jcbClass.getRenderer();
+		//
+		jcbClass.setRenderer((a, value, c, d, e) -> {
+			//
+			final Class<?> clz = cast(Class.class, value);
+			//
+			return getListCellRendererComponent(listCellRenderer, a,
+					clz != null ? clz.getSimpleName() : toString(value), c, d, e);
+			//
+		});
+		//
 		Class<?> clz = null;
 		//
 		for (int i = 0; cbmClass != null && i < cbmClass.getSize(); i++) {
@@ -170,6 +183,19 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 		btnExecute.addActionListener(this);
 		//
 		addKeyListener(this, tfUnitStart, tfUnitEnd, tfNumberStart, tfNumberEnd);
+		//
+	}
+
+	private static String toString(final Object instance) {
+		return instance != null ? instance.toString() : null;
+	}
+
+	private static <E> Component getListCellRendererComponent(final ListCellRenderer<E> instance,
+			final JList<? extends E> list, final E value, final int index, final boolean isSelected,
+			final boolean cellHasFocus) {
+		//
+		return instance != null ? instance.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+				: null;
 		//
 	}
 
@@ -259,7 +285,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 					//
 			} // if
 				//
-			return toString(append(sb, ".html"));
+			return KanjiNoHon.toString(append(sb, ".html"));
 			//
 		}
 
@@ -269,10 +295,6 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 
 		private static StringBuilder append(final StringBuilder instance, final String str) {
 			return instance != null ? instance.append(str) : null;
-		}
-
-		private static String toString(final Object instance) {
-			return instance != null ? instance.toString() : null;
 		}
 
 	}
