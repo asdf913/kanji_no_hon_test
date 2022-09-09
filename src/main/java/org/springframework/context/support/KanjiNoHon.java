@@ -1,18 +1,26 @@
 package org.springframework.context.support;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EventObject;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,13 +30,17 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
@@ -40,6 +52,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.QueryFunction;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
@@ -54,7 +69,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateUtil;
 import net.miginfocom.swing.MigLayout;
 
-public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAware {
+public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, EnvironmentAware {
 
 	private static final long serialVersionUID = -7531663604832571859L;
 
@@ -68,7 +83,11 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 
 	private AbstractButton btnExecute = null;
 
-	private JTextComponent tfNumberStart, tfNumberEnd, tfUnitStart, tfUnitEnd = null;
+	private JTextComponent tfNumberStart, tfNumberEnd, tfUnitStart, tfUnitEnd, tfFileName = null;
+
+	private ComboBoxModel<?> cbmClass = null;
+
+	private JComboBox<?> jcbClass = null;
 
 	private KanjiNoHon() {
 	}
@@ -89,11 +108,14 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 		add(tfUnitStart = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
 				"org.springframework.context.support.KanjiNoHon.unitStart")), String.format("wmin %1$spx", 50));
 		//
+		tfUnitStart.addKeyListener(this);
+		//
 		add(new JLabel(" - "));
 		//
+		final String span = String.format("%1$s,wmin %2$spx", WRAP, 50);
+		//
 		add(tfUnitEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
-				"org.springframework.context.support.KanjiNoHon.unitEnd")),
-				String.format("%1$s,wmin %2$spx", WRAP, 50));
+				"org.springframework.context.support.KanjiNoHon.unitEnd")), span);
 		//
 		add(new JLabel("Number Range"));
 		//
@@ -103,20 +125,164 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 		add(new JLabel(" - "));
 		//
 		add(tfNumberEnd = new JTextField(PropertyResolverUtil.getProperty(propertyResolver,
-				"org.springframework.context.support.KanjiNoHon.numberEnd")), String.format("%1$s,%2$s", WRAP, GROWX));
+				"org.springframework.context.support.KanjiNoHon.numberEnd")), span);
+		//
+		add(new JLabel("File Name Generator"));
+		//
+		add(jcbClass = new JComboBox(cbmClass = testAndApply(Objects::nonNull,
+				ArrayUtils.insert(0,
+						toArray(new Reflections(getPackageName(getClass()))
+								.get(asClass(Scanners.SubTypes.of(FileNameGenerator.class))), new Class<?>[] {}),
+						(Class<?>) null),
+				DefaultComboBoxModel::new, null)), String.format("%1$s,span %2$s", WRAP, 3));
+		//
+		jcbClass.addActionListener(this);
+		//
+		Class<?> clz = null;
+		//
+		for (int i = 0; cbmClass != null && i < cbmClass.getSize(); i++) {
+			//
+			if ((clz = cast(Class.class, cbmClass.getElementAt(i))) == null) {
+				//
+				continue;
+				//
+			} // if
+				//
+			if (Objects.equals(PropertyResolverUtil.getProperty(propertyResolver,
+					"org.springframework.context.support.KanjiNoHon.FileNameGeneratorClass"), clz.getName())) {
+				//
+				cbmClass.setSelectedItem(clz);
+				//
+			} // if
+				//
+		} // for
+			//
+		add(new JLabel("File Name"));
+		//
+		add(tfFileName = new JTextField(), String.format("%1$s,%2$s,span %3$s", WRAP, GROWX, 3));
+		//
+		tfFileName.setEditable(false);
 		//
 		add(new JLabel());
 		//
-		add(btnExecute = new JButton("Execute"), String.format("span %1$s", 3));
+		add(btnExecute = new JButton("Execute"), String.format("span %1$s", 4));
 		//
 		btnExecute.addActionListener(this);
 		//
+		addKeyListener(this, tfUnitStart, tfUnitEnd, tfNumberStart, tfNumberEnd);
+		//
+	}
+
+	private static void addKeyListener(final KeyListener keyListener, final Component a, final Component b,
+			final Component... cs) {
+		//
+		addKeyListener(a, keyListener);
+		//
+		addKeyListener(b, keyListener);
+		//
+		for (int i = 0; cs != null && i < cs.length; i++) {
+			//
+			addKeyListener(cs[i], keyListener);
+			//
+		} // for
+			//
+	}
+
+	private static void addKeyListener(final Component instance, final KeyListener keyListener) {
+		//
+		if (instance != null) {
+			instance.addKeyListener(keyListener);
+		} // if
+			//
+	}
+
+	private static <T> T[] toArray(final Collection<T> instance, final T[] array) {
+		//
+		return instance != null && (array != null || Proxy.isProxyClass(getClass(instance))) ? instance.toArray(array)
+				: null;
+		//
+	}
+
+	private static Class<?> getClass(final Object instance) {
+		return instance != null ? instance.getClass() : null;
+	}
+
+	private static <C, R> QueryFunction<C, Class<?>> asClass(final QueryFunction<C, ?> instance,
+			final ClassLoader... loaders) {
+		return instance != null ? instance.asClass(loaders) : null;
+	}
+
+	private static String getPackageName(final Class<?> instance) {
+		return instance != null ? instance.getPackageName() : null;
+	}
+
+	private static interface FileNameGenerator {
+
+		String genereate(final KanjiNoHon instance);
+
+	}
+
+	private static class FileNameGeneratorImpl implements FileNameGenerator {
+
+		@Override
+		public String genereate(final KanjiNoHon instance) {
+			//
+			final StringBuilder sb = new StringBuilder("KanjiNoHon");
+			//
+			if (instance != null) {
+				//
+				final String unitStart = getText(instance.tfUnitStart);
+				//
+				final String unitEnd = getText(instance.tfUnitEnd);
+				//
+				if (StringUtils.isNotBlank(unitStart) || StringUtils.isNotBlank(unitEnd)) {
+					//
+					append(sb, '(');
+					//
+					append(sb, StringUtils.trim(unitStart));
+					//
+					if (StringUtils.isNotBlank(unitEnd)) {
+						//
+						if (StringUtils.isNotBlank(unitStart) && sb.length() > 0) {
+							//
+							sb.append('-');
+							//
+						} // if
+							//
+						append(sb, StringUtils.trim(unitEnd));
+						//
+					} // if
+						//
+					append(sb, ')');
+					//
+				} // if
+					//
+			} // if
+				//
+			return toString(append(sb, ".html"));
+			//
+		}
+
+		private static StringBuilder append(final StringBuilder instance, final char c) {
+			return instance != null ? instance.append(c) : null;
+		}
+
+		private static StringBuilder append(final StringBuilder instance, final String str) {
+			return instance != null ? instance.append(str) : null;
+		}
+
+		private static String toString(final Object instance) {
+			return instance != null ? instance.toString() : null;
+		}
+
 	}
 
 	@Override
 	public void actionPerformed(final ActionEvent evt) {
 		//
-		if (Objects.equals(evt != null ? evt.getSource() : null, btnExecute)) {
+		final Object source = getSource(evt);
+		//
+		if (Objects.equals(source, btnExecute)) {
 			//
 			final JFileChooser jfc = new JFileChooser(".");
 			//
@@ -311,12 +477,110 @@ public class KanjiNoHon extends JFrame implements ActionListener, EnvironmentAwa
 				//
 			} // try
 				//
+		} else if (Objects.equals(source, jcbClass)) {
+			//
+			setFileName();
+			//
 		} // if
 			//
 	}
 
+	@Override
+	public void keyTyped(final KeyEvent evt) {
+	}
+
+	@Override
+	public void keyPressed(final KeyEvent evt) {
+	}
+
+	@Override
+	public void keyReleased(final KeyEvent evt) {
+		//
+		if (contains(Arrays.asList(tfUnitStart, tfUnitEnd, tfNumberStart, tfNumberEnd), getSource(evt))) {
+			//
+			setFileName();
+			//
+		} // if
+			//
+	}
+
+	private void setFileName() {
+		//
+		final Class<?> clz = cbmClass != null ? cast(Class.class, cbmClass.getSelectedItem()) : null;
+		//
+		final List<Constructor<?>> cs = toList(
+				filter(testAndApply(Objects::nonNull, clz != null ? clz.getDeclaredConstructors() : null,
+						Arrays::stream, null), c -> c != null && c.getParameterCount() == 0));
+		//
+		Constructor<?> constructor = null;
+		//
+		if (cs != null && !cs.isEmpty()) {
+			//
+			if (cs.size() > 1) {
+				//
+				throw new IllegalStateException();
+				//
+			} // if
+				//
+			constructor = cs.get(0);
+			//
+		} // if
+			//
+		try {
+			//
+			setText(tfFileName, null);
+			//
+			final FileNameGenerator fileNameGenerator = cast(FileNameGenerator.class,
+					constructor != null ? constructor.newInstance() : null);
+			//
+			if (fileNameGenerator != null && tfFileName != null) {
+				//
+				setText(tfFileName, fileNameGenerator.genereate(this));
+				//
+			} // if
+				//
+		} catch (final InstantiationException | IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (final InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // if
+			//
+	}
+
+	private static <T> List<T> toList(final Stream<T> instance) {
+		return instance != null ? instance.toList() : null;
+	}
+
+	private static <T> Stream<T> filter(final Stream<T> instance, final Predicate<? super T> predicate) {
+		//
+		return instance != null && (predicate != null || Proxy.isProxyClass(getClass(instance)))
+				? instance.filter(predicate)
+				: null;
+		//
+	}
+
+	private static <T> T cast(final Class<T> clz, final Object value) {
+		return clz != null && clz.isInstance(value) ? clz.cast(value) : null;
+	}
+
+	private static boolean contains(final Collection<?> items, final Object item) {
+		return items != null && items.contains(item);
+	}
+
+	private static Object getSource(final EventObject instance) {
+		return instance != null ? instance.getSource() : null;
+	}
+
 	private static String getText(final JTextComponent instance) {
 		return instance != null ? instance.getText() : null;
+	}
+
+	private static void setText(final JTextComponent instance, final String text) {
+		if (instance != null) {
+			instance.setText(text);
+		}
 	}
 
 	private static Integer valueOf(final String instance) {
