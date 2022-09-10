@@ -453,7 +453,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 								//
 								first = false;
 								//
-							} else {
+							} else if (containsNonNullValue(text)) {
 								//
 								if (unitStart != null && text.unit != null
 										&& unitStart.intValue() > text.unit.intValue()) {// unit
@@ -544,6 +544,28 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			//
 		} // if
 			//
+	}
+
+	private static boolean containsNonNullValue(final Object instance) throws IllegalAccessException {
+		//
+		final Field[] fs = testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFields, null);
+		//
+		Field f = null;
+		//
+		for (int i = 0; fs != null && i < fs.length; i++) {
+			//
+			if ((f = fs[i]) == null || f.get(instance) == null) {
+				//
+				continue;
+				//
+			} // if
+				//
+			return true;
+			//
+		} // if
+			//
+		return false;
+		//
 	}
 
 	private static <E> void add(final Collection<E> items, final E item) {
