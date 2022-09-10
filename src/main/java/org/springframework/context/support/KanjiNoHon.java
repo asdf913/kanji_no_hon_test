@@ -453,7 +453,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 								//
 								first = false;
 								//
-							} else if ((texts = ObjectUtils.getIfNull(texts, ArrayList::new)) != null) {
+							} else {
 								//
 								if (unitStart != null && text.unit != null
 										&& unitStart.intValue() > text.unit.intValue()) {// unit
@@ -477,7 +477,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 									//
 								} //
 									//
-								texts.add(text);
+								add(texts = ObjectUtils.getIfNull(texts, ArrayList::new), text);
 								//
 							} // if
 								//
@@ -546,6 +546,12 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			//
 	}
 
+	private static <E> void add(final Collection<E> items, final E item) {
+		if (items != null) {
+			items.add(item);
+		}
+	}
+
 	private static List<String> getOleEntryNames(final POIFSFileSystem poifs) {
 		//
 		List<String> list = null;
@@ -558,13 +564,13 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 		//
 		while (entries != null && entries.hasNext()) {
 			//
-			if ((entry = entries.next()) == null || (list = ObjectUtils.getIfNull(list, ArrayList::new)) == null) {
+			if ((entry = entries.next()) == null) {
 				//
 				continue;
 				//
 			} // if
 				//
-			list.add(entry.getName());
+			add(list = ObjectUtils.getIfNull(list, ArrayList::new), entry.getName());
 			//
 		} // while
 			//
