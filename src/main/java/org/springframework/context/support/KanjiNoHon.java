@@ -8,6 +8,7 @@ import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -16,11 +17,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EventObject;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import java.util.zip.ZipFile;
 
 import javax.swing.AbstractButton;
 import javax.swing.ComboBoxModel;
@@ -38,9 +42,13 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.text.JTextComponent;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -48,6 +56,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.poifs.crypt.Decryptor;
+import org.apache.poi.poifs.crypt.EncryptionInfo;
+import org.apache.poi.poifs.filesystem.DirectoryNode;
+import org.apache.poi.poifs.filesystem.Entry;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -61,8 +74,16 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.PropertyResolverUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import com.google.common.reflect.Reflection;
+import com.j256.simplemagic.ContentInfo;
+import com.j256.simplemagic.ContentInfoUtil;
 
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
@@ -318,7 +339,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 				//
 			List<Text> texts = null;
 			//
-			try (final Workbook workbook = file != null ? new XSSFWorkbook(file) : null) {
+			try (final Workbook workbook = getWorkbook(file)) {
 				//
 				Text text = null;
 				//
@@ -466,7 +487,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 						//
 				} // if
 					//
-			} catch (final InvalidFormatException | IOException | IllegalAccessException e) {
+			} catch (final InvalidFormatException | IOException | IllegalAccessException | GeneralSecurityException e) {
 				//
 				// TODO Auto-generated catch block
 				//
@@ -525,6 +546,136 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			//
 	}
 
+	private static List<String> getOleEntryNames(final POIFSFileSystem poifs) {
+		//
+		List<String> list = null;
+		//
+		final DirectoryNode root = poifs != null ? poifs.getRoot() : null;
+		//
+		final Iterator<Entry> entries = root != null ? root.getEntries() : null;
+		//
+		Entry entry = null;
+		//
+		while (entries != null && entries.hasNext()) {
+			//
+			if ((entry = entries.next()) == null || (list = ObjectUtils.getIfNull(list, ArrayList::new)) == null) {
+				//
+				continue;
+				//
+			} // if
+				//
+			list.add(entry.getName());
+			//
+		} // while
+			//
+		return list;
+		//
+	}
+
+	private static Workbook getWorkbook(final File file)
+			throws IOException, GeneralSecurityException, InvalidFormatException {
+		//
+		final ContentInfo ci = testAndApply(Objects::nonNull, file, new ContentInfoUtil()::findMatch, null);
+		//
+		final String message = ci != null ? ci.getMessage() : null;
+		//
+		final String mimeType = ci != null ? ci.getMimeType() : null;
+		//
+		if (Objects.equals(message, "OLE 2 Compound Document")) {
+			//
+			try (final POIFSFileSystem poifs = new POIFSFileSystem(file)) {
+				//
+				if (Objects.equals(getOleEntryNames(poifs), Arrays.asList("EncryptedPackage", "EncryptionInfo"))) {
+					//
+					final Decryptor decryptor = Decryptor.getInstance(new EncryptionInfo(poifs));
+					//
+					final String password = JOptionPane.showInputDialog("Password");
+					//
+					if (decryptor != null && decryptor.verifyPassword(password)) {
+						//
+						try (final InputStream is = decryptor.getDataStream(poifs)) {
+							//
+							return new XSSFWorkbook(is);
+							//
+						} // try
+							//
+					} // if
+						//
+				} // if
+					//
+			} // try
+				//
+		} else if (Objects.equals(message, "Microsoft Office Open XML")
+				|| Objects.equals(mimeType, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+			//
+			return new XSSFWorkbook(file);
+			//
+		} else if (Objects.equals(mimeType, "application/zip")) {
+			//
+			try (final ZipFile zf = new ZipFile(file)) {
+				//
+				try (final InputStream is = testAndApply(Objects::nonNull,
+						testAndApply(Objects::nonNull, "[Content_Types].xml", zf::getEntry, null), zf::getInputStream,
+						null)) {
+					//
+					final DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
+					//
+					final DocumentBuilder db = dbf != null ? dbf.newDocumentBuilder() : null;
+					//
+					final Document document = db != null ? db.parse(is) : null;
+					//
+					final Element documentElement = document != null ? document.getDocumentElement() : null;
+					//
+					final NodeList childNodes = documentElement != null ? documentElement.getChildNodes() : null;
+					//
+					Node node = null;
+					//
+					boolean isXlsx = false;
+					//
+					for (int i = 0; childNodes != null && i < childNodes.getLength(); i++) {
+						//
+						if ((node = childNodes.item(i)) == null) {
+							//
+							continue;
+							//
+						} // if
+							//
+						if (Objects.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml",
+								getTextContent(getNamedItem(node.getAttributes(), "ContentType"))) && (isXlsx = true)) {
+							//
+							break;
+							//
+						} // if
+							//
+					} // for
+						//
+					if (isXlsx) {
+						//
+						return new XSSFWorkbook(file);
+						//
+					} // if
+						//
+				} catch (final ParserConfigurationException | SAXException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} // try
+					//
+			} // try
+				//
+		} // if
+			//
+		return null;
+		//
+	}
+
+	private static String getTextContent(final Node instance) {
+		return instance != null ? instance.getTextContent() : null;
+	}
+
+	private static Node getNamedItem(final NamedNodeMap instance, final String name) {
+		return instance != null ? instance.getNamedItem(name) : null;
+	}
+
 	@Override
 	public void keyTyped(final KeyEvent evt) {
 	}
@@ -546,26 +697,6 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 
 	private void setFileName() {
 		//
-		final Class<?> clz = cbmClass != null ? cast(Class.class, cbmClass.getSelectedItem()) : null;
-		//
-		final List<Constructor<?>> cs = toList(
-				filter(testAndApply(Objects::nonNull, clz != null ? clz.getDeclaredConstructors() : null,
-						Arrays::stream, null), c -> c != null && c.getParameterCount() == 0));
-		//
-		Constructor<?> constructor = null;
-		//
-		if (cs != null && !cs.isEmpty()) {
-			//
-			if (cs.size() > 1) {
-				//
-				throw new IllegalStateException();
-				//
-			} // if
-				//
-			constructor = cs.get(0);
-			//
-		} // if
-			//
 		try {
 			//
 			setText(tfFileName, getFileName());

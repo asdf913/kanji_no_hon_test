@@ -82,6 +82,12 @@
 			<artifactId>reflections</artifactId>
 			<version>0.10.2</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.j256.simplemagic/simplemagic -->
+		<dependency>
+			<groupId>com.j256.simplemagic</groupId>
+			<artifactId>simplemagic</artifactId>
+			<version>1.17</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<pluginManagement>
