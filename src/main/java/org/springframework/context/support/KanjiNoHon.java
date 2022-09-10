@@ -55,6 +55,8 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.hssf.record.crypto.Biff8EncryptionKey;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.poifs.crypt.Decryptor;
@@ -634,8 +636,26 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 						//
 				} else if (contains(oleEntryNames, "Workbook")) {
 					//
-					return new HSSFWorkbook(poifs);
-					//
+					try {
+						//
+						return new HSSFWorkbook(poifs);
+						//
+					} catch (final EncryptedDocumentException e) {
+						//
+						Biff8EncryptionKey.setCurrentUserPassword(JOptionPane.showInputDialog("Password"));
+						//
+						try {
+							//
+							return new HSSFWorkbook(poifs);
+							//
+						} finally {
+							//
+							Biff8EncryptionKey.setCurrentUserPassword(null);
+							//
+						} // try
+							//
+					} // try
+						//
 				} // if
 					//
 			} // try
