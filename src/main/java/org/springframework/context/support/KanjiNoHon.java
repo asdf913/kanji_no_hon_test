@@ -55,6 +55,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.poifs.crypt.Decryptor;
 import org.apache.poi.poifs.crypt.EncryptionInfo;
@@ -613,7 +614,9 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			//
 			try (final POIFSFileSystem poifs = new POIFSFileSystem(file)) {
 				//
-				if (Objects.equals(getOleEntryNames(poifs), Arrays.asList("EncryptedPackage", "EncryptionInfo"))) {
+				final List<String> oleEntryNames = getOleEntryNames(poifs);
+				//
+				if (Objects.equals(oleEntryNames, Arrays.asList("EncryptedPackage", "EncryptionInfo"))) {
 					//
 					final Decryptor decryptor = Decryptor.getInstance(new EncryptionInfo(poifs));
 					//
@@ -629,6 +632,10 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 							//
 					} // if
 						//
+				} else if (contains(oleEntryNames, "Workbook")) {
+					//
+					return new HSSFWorkbook(poifs);
+					//
 				} // if
 					//
 			} // try
