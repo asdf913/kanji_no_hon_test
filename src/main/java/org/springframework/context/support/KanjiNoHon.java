@@ -43,6 +43,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.text.JTextComponent;
@@ -622,9 +623,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 					//
 					final Decryptor decryptor = Decryptor.getInstance(new EncryptionInfo(poifs));
 					//
-					final String password = JOptionPane.showInputDialog("Password");
-					//
-					if (decryptor != null && decryptor.verifyPassword(password)) {
+					if (decryptor != null && decryptor.verifyPassword(getPassword())) {
 						//
 						try (final InputStream is = decryptor.getDataStream(poifs)) {
 							//
@@ -642,7 +641,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 						//
 					} catch (final EncryptedDocumentException e) {
 						//
-						Biff8EncryptionKey.setCurrentUserPassword(JOptionPane.showInputDialog("Password"));
+						Biff8EncryptionKey.setCurrentUserPassword(getPassword());
 						//
 						try {
 							//
@@ -720,6 +719,16 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 		} // if
 			//
 		return null;
+		//
+	}
+
+	private static String getPassword() {
+		//
+		final JTextComponent jtc = new JPasswordField();
+		//
+		return JOptionPane.showConfirmDialog(null, jtc, "Password", JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION
+				? getText(jtc)
+				: null;
 		//
 	}
 
