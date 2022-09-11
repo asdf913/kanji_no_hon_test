@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -429,14 +428,6 @@ public class Katsuyou extends JFrame implements ActionListener, EnvironmentAware
 				int columnIndex;
 				//
 				boolean first = true;
-				//
-//				Field[] fs = null;
-				//
-				Field f = null;
-				//
-				String string = null;
-				//
-				Integer integer = null;
 				//
 				IntMap<String> intMap = null;
 				//
