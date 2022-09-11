@@ -115,9 +115,8 @@ public class WorkbookUtil {
 						testAndApply(Objects::nonNull, "[Content_Types].xml", zf::getEntry, null), zf::getInputStream,
 						null)) {
 					//
-					final DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
-					//
-					final Document document = is != null ? parse(dbf != null ? dbf.newDocumentBuilder() : null, is)
+					final Document document = is != null
+							? parse(newDocumentBuilder(DocumentBuilderFactory.newDefaultInstance()), is)
 							: null;
 					//
 					final Element documentElement = document != null ? document.getDocumentElement() : null;
@@ -162,6 +161,11 @@ public class WorkbookUtil {
 			//
 		return null;
 		//
+	}
+
+	private static DocumentBuilder newDocumentBuilder(final DocumentBuilderFactory instance)
+			throws ParserConfigurationException {
+		return instance != null ? instance.newDocumentBuilder() : null;
 	}
 
 	private static Document parse(final DocumentBuilder instance, final InputStream is)
