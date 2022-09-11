@@ -115,11 +115,9 @@ public class WorkbookUtil {
 						testAndApply(Objects::nonNull, "[Content_Types].xml", zf::getEntry, null), zf::getInputStream,
 						null)) {
 					//
-					final Document document = is != null
-							? parse(newDocumentBuilder(DocumentBuilderFactory.newDefaultInstance()), is)
-							: null;
-					//
-					final Element documentElement = document != null ? document.getDocumentElement() : null;
+					final Element documentElement = getDocumentElement(
+							is != null ? parse(newDocumentBuilder(DocumentBuilderFactory.newDefaultInstance()), is)
+									: null);
 					//
 					final NodeList childNodes = documentElement != null ? documentElement.getChildNodes() : null;
 					//
@@ -161,6 +159,10 @@ public class WorkbookUtil {
 			//
 		return null;
 		//
+	}
+
+	private static Element getDocumentElement(final Document instance) {
+		return instance != null ? instance.getDocumentElement() : null;
 	}
 
 	private static DocumentBuilder newDocumentBuilder(final DocumentBuilderFactory instance)
