@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +40,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.WorkbookUtil;
 import org.javatuples.Unit;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -421,7 +422,7 @@ public class Katsuyou extends JFrame implements ActionListener, EnvironmentAware
 			//
 			List<String> japaneseVerbConjugations = null;
 			//
-			try (final Workbook workbook = new XSSFWorkbook(file)) {
+			try (final Workbook workbook = WorkbookUtil.getWorkbook(file)) {
 				//
 				Verb verb = null;
 				//
@@ -503,7 +504,7 @@ public class Katsuyou extends JFrame implements ActionListener, EnvironmentAware
 						//
 				} // for
 					//
-			} catch (final InvalidFormatException | IOException e) {
+			} catch (final InvalidFormatException | IOException | GeneralSecurityException e) {
 				//
 				// TODO Auto-generated catch block
 				//

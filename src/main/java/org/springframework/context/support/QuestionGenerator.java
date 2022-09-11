@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,7 +47,7 @@ import org.apache.poi.ss.usermodel.RichTextString;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.WorkbookUtil;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertyResolver;
@@ -139,7 +140,7 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 				//
 			List<Question> questions = null;
 			//
-			try (final Workbook workbook = new XSSFWorkbook(file)) {
+			try (final Workbook workbook = WorkbookUtil.getWorkbook(file)) {
 				//
 				Question question = null;
 				//
@@ -382,7 +383,7 @@ public class QuestionGenerator extends JFrame implements ActionListener, Environ
 						//
 				} // for
 					//
-			} catch (final InvalidFormatException | IOException | IllegalAccessException e) {
+			} catch (final InvalidFormatException | IOException | IllegalAccessException | GeneralSecurityException e) {
 				//
 				// TODO Auto-generated catch block
 				//
