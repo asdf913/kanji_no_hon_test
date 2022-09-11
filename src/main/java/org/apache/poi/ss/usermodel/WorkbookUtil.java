@@ -117,9 +117,8 @@ public class WorkbookUtil {
 					//
 					final DocumentBuilderFactory dbf = DocumentBuilderFactory.newDefaultInstance();
 					//
-					final DocumentBuilder db = dbf != null ? dbf.newDocumentBuilder() : null;
-					//
-					final Document document = db != null ? db.parse(is) : null;
+					final Document document = is != null ? parse(dbf != null ? dbf.newDocumentBuilder() : null, is)
+							: null;
 					//
 					final Element documentElement = document != null ? document.getDocumentElement() : null;
 					//
@@ -163,6 +162,11 @@ public class WorkbookUtil {
 			//
 		return null;
 		//
+	}
+
+	private static Document parse(final DocumentBuilder instance, final InputStream is)
+			throws SAXException, IOException {
+		return instance != null ? instance.parse(is) : null;
 	}
 
 	private static <T, R, E extends Throwable> R testAndApply(final Predicate<T> predicate, final T value,
