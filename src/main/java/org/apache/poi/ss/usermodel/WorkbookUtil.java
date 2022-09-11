@@ -62,7 +62,8 @@ public class WorkbookUtil {
 				//
 				final List<String> oleEntryNames = getOleEntryNames(poifs);
 				//
-				if (Objects.equals(oleEntryNames, Arrays.asList(Decryptor.DEFAULT_POIFS_ENTRY, "EncryptionInfo"))) {
+				if (Objects.equals(oleEntryNames,
+						Arrays.asList(Decryptor.DEFAULT_POIFS_ENTRY, EncryptionInfo.ENCRYPTION_INFO_ENTRY))) {
 					//
 					final Decryptor decryptor = Decryptor.getInstance(new EncryptionInfo(poifs));
 					//
