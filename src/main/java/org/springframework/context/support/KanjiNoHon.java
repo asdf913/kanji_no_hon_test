@@ -269,7 +269,7 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 					//
 					append(sb, StringUtils.trim(unitStart));
 					//
-					if (StringUtils.isNotBlank(unitEnd)) {
+					if (!StringUtils.equals(unitStart, unitEnd) && StringUtils.isNotBlank(unitEnd)) {
 						//
 						if (StringUtils.isNotBlank(unitStart) && sb.length() > 0) {
 							//
