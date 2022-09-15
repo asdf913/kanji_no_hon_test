@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -500,7 +501,11 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 				//
 				if (w != null) {
 					//
-					TemplateUtil.process(template, new LinkedHashMap<>(Collections.singletonMap("texts", texts)), w);
+					final Map<String, Object> map = new LinkedHashMap<>(Collections.singletonMap("texts", texts));
+					//
+					map.put("units", toList(distinct(map(stream(texts), x -> x != null ? x.unit : null))));
+					//
+					TemplateUtil.process(template, map, w);
 					//
 				} // if
 					//
@@ -524,6 +529,21 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 			//
 		} // if
 			//
+	}
+
+	private static <E> Stream<E> stream(final Collection<E> instance) {
+		return instance != null ? instance.stream() : null;
+	}
+
+	private static <T, R> Stream<R> map(final Stream<T> instance, final Function<? super T, ? extends R> mapper) {
+		//
+		return instance != null && (Proxy.isProxyClass(getClass(instance)) || mapper != null) ? instance.map(mapper)
+				: null;
+		//
+	}
+
+	private static <T> Stream<T> distinct(final Stream<T> instance) {
+		return instance != null ? instance.distinct() : null;
 	}
 
 	private static boolean containsNonNullValue(final Object instance) throws IllegalAccessException {
@@ -676,6 +696,10 @@ public class KanjiNoHon extends JFrame implements ActionListener, KeyListener, E
 
 		public String getHint() {
 			return hint;
+		}
+
+		public Integer getUnit() {
+			return unit;
 		}
 
 	}

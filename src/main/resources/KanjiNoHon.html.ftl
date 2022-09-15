@@ -13,7 +13,7 @@
 				<thead v-if="mode!==null&&mode.length>0">
 					<tr>
 						<th>Unit</th>
-						<th>{{unit}}</th>
+						<th><select multiple="multiple" v-model="units"><option></option><#if units??&&units?is_sequence><#list units as unit><#if unit??><option>#{unit}</option></#if></#list></#if></select></th>
 					</tr>
 				</thead>
 				<tbody v-if="mode==='hiragana'">
@@ -50,8 +50,31 @@
 				,data:{
 					 mode:null
 					,shuffle:null
-					,unit:"4"
-					,originalItems:[<#if texts??><#list texts as text>{"text":"${text.text!""}","hiragana":"${text.hiragana!""}","hint":"${text.hint!""}"}<#sep>,</#sep></#list></#if>]
+					,units:[]
+					,originalItems:[<#if texts??&&texts?is_sequence><#list texts as text>{"unit":"${text.unit!""}","text":"${text.text!""}","hiragana":"${text.hiragana!""}","hint":"${text.hint!""}"}<#sep>,</#sep></#list></#if>]
+				}
+				,watch:{
+					units:function(values){
+						//
+						var items=JSON.parse(JSON.stringify(this.originalItems));
+						//
+						if(items!==null){
+							items=items.filter(x=>x===null||values===null||values.includes(x.unit)).map(v=>v);
+						}
+						//
+						//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+						//
+						if(typeof this.shuffle==="boolean"&&this.shuffle){
+							items= items.map(value => ({value,sort:Math.random()}))
+								  .sort((a, b)=>a.sort-b.sort)
+								  .map(({value})=>value);
+						}
+						//
+						Vue.set(this,"items",items);
+						//
+						this.clearAnswers();
+						//
+					}
 				},methods:{
 					show:function(mode){
 						//
@@ -59,6 +82,9 @@
 						//
 						var items=JSON.parse(JSON.stringify(this.originalItems));
 						//
+						if(items!==null&&typeof this.units==="object"&&this.units!==null&&typeof this.units.length==="number"&&this.units.length>0){
+							items=items.filter(x=>x===null||this.units===null||this.units.includes(x.unit)).map(v=>v);
+						}
 						//https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 						//
 						if(typeof this.shuffle==="boolean"&&this.shuffle){
@@ -73,9 +99,10 @@
 						//
 					},clearAnswers:function(){
 						for(var i=0;this.items!==null&&i<this.items.length;i++){
+							if(this.items[i]==null){continue;}
 							Vue.set(this.items[i],"answer","");
 						}
-					},isCorrect:function(item){
+					},isCorrect:function(item){	
 						if(item!==null){
 							if(      this.mode==='hiragana'){return item.answer===item.hiragana;
 							}else if(this.mode==='text'    ){return item.answer===item.text;}
